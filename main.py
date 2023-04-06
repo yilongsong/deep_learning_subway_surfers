@@ -1,19 +1,23 @@
 
 
 # main.py
+
 # For running trained models
-# Author: yilong song
-# Date: Apr 6, 2023
+
+# yilong song
+# Apr 6, 2023
 
 
 def play():
     while True: # Infinite loop
-        
-def open_game()
+        continue 
+
+def open_game():
+    pass
 
 def main():
     # Open game
 
     # Start playing
 
-    
+    pass
