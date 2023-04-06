@@ -21,32 +21,17 @@ import random
 class ConvNet(nn.Module):
     def __init__(self):
         super(ConvNet, self).__init__()
-        # Convolutional layer 1 with 32 filters, a kernel size of 3x3
-        self.conv1 = nn.Conv2d(4, 32, 3)
-        # Max pooling layer 1 with pool size of 2x2
-        self.pool = nn.MaxPool2d(2, 2)
-        # Convolutional layer 2 with 64 filters, a kernel size of 3x3
+        self.conv1 = nn.Conv2d(3, 32, 3)
         self.conv2 = nn.Conv2d(32, 64, 3)
-        # Convolutional layer 3 with 128 filters, a kernel size of 3x3
-        self.conv3 = nn.Conv2d(64, 128, 3)
-        # Fully connected (dense) layer 1 with 256 units
-        self.fc1 = nn.Linear(128 * 5 * 9, 256)
-        # Dropout layer with a rate of 0.5 to reduce overfitting
-        self.dropout = nn.Dropout(0.5)
-        # Fully connected (dense) layer 2 with 128 units
-        self.fc2 = nn.Linear(256, 128)
-        # Output layer
-        self.fc3 = nn.Linear(128, 4)
+        self.fc1 = nn.Linear(64 * 223 * 400, 128)
+        self.fc2 = nn.Linear(128, 4)
 
     def forward(self, x):
-        x = self.pool(F.relu(self.conv1(x)))
-        x = self.pool(F.relu(self.conv2(x)))
-        x = self.pool(F.relu(self.conv3(x)))
-        x = x.view(-1, 128 * 5 * 9)
+        x = F.relu(self.conv1(x))
+        x = F.relu(self.conv2(x))
+        x = x.view(-1, 64 * 223 * 400)
         x = F.relu(self.fc1(x))
-        x = self.dropout(x)
-        x = F.relu(self.fc2(x))
-        x = self.fc3(x)
+        x = self.fc2(x)
         return x
 
 # Training
@@ -79,13 +64,13 @@ for folder in os.listdir('dataset'):
         x = transform(x)
         X.append(x)
         if folder == 'up':
-            y.append([1,0,0,0])
+            y.append(0)
         if folder == 'down':
-            y.append([0,1,0,0])
+            y.append(1)
         if folder == 'left':
-            y.append([0,0,1,0])
+            y.append(2)
         if folder == 'right':
-            y.append([0,0,0,1])
+            y.append(3)
 
 
 # Shuffle X and y
@@ -101,11 +86,11 @@ X_test = X_shuffled[int(len(X)*0.7):]
 y_test = y_shuffled[int(len(X)*0.7):]
 
 X_train = torch.stack(X_train).to(device)
-y_train = torch.tensor(y_train, dtype=torch.long).to(device)
+y_train = torch.tensor(y_train, dtype=torch.float).to(device)
 
 # Hyperparameters
-num_epochs = 100
-batch_size = 100
+num_epochs = 3
+batch_size = 2
 num_batches = len(X_train) // batch_size
 
 for epoch in range(num_epochs):
@@ -121,6 +106,9 @@ for epoch in range(num_epochs):
 
         # Forward pass
         outputs = model(batch_X)
+        print(outputs)
+        print(batch_y)
+        batch_y = batch_y.long()
         loss = criterion(outputs, batch_y)
 
         # Backward pass and optimization
@@ -136,8 +124,8 @@ for epoch in range(num_epochs):
 
 # Evaluation
 model.eval()  # Set the model to evaluation mode
-X_test = torch.tensor(X_test, dtype=torch.float32).to(device)
-y_test = torch.tensor(y_test, dtype=torch.long).to(device)
+X_test = torch.stack(X_test).to(device)
+y_test = torch.tensor(y_test, dtype=torch.float).to(device)
 
 with torch.no_grad():
     # Forward pass for testing data
