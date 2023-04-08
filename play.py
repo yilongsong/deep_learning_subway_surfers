@@ -74,8 +74,6 @@ def move(n):
     
 
 def play(model):
-    model = ConvNet()
-    transform = transforms.ToTensor()
     softmax = nn.Softmax(dim=1)
 
     while True:
@@ -86,7 +84,7 @@ def play(model):
         # print(pred)
 
         move(max_index)
-        time.sleep(0.05)
+        time.sleep(0.2)
         
 
 
